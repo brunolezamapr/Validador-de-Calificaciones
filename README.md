@@ -1,5 +1,34 @@
 # 📁 Proyecto 1: Validador de Calificaciones y Estudiantes
 
+# 🎓 Validador de Calificaciones y Estudiantes (POO en Python)
+
+Un sistema modular y didáctico desarrollado en Python que demuestra la aplicación práctica de patrones avanzados de **Programación Orientada a Objetos (POO)**. Este proyecto está diseñado como una guía de referencia para entender cómo estructurar un modelo de dominio con validaciones robustas, propiedades calculadas, métodos utilitarios y operadores de comparación.
+
+---
+
+## 📌 ¿Por qué este proyecto? (Conceptos Clave de POO)
+
+Al construir sistemas académicos o administrativos, es muy común encontrarse con código repetitivo en la validación de atributos o con clases sobrecargadas. En esta solución resolvemos esos problemas utilizando cuatro pilares clave de Python:
+
+
+## 📁 Estructura del Proyecto
+
+```text
+ValidadorCalificaciones/
+│
+├── descriptors.py    # Descriptor reusable ValidarNota (Protocolo __get__/__set__)
+├── Estudiante.py     # Entidad principal del dominio con @property y @staticmethod
+├── main.py           # Suite de pruebas con ejecuciones e impresiones interactivas
+└── README.md         # Documentación técnica y explicativa del proyecto
+```
+### 1. Descriptores de Validación Reusables (`ValidarNota`)
+* **El Problema:** Si tuviéramos múltiples atributos de nota (ej: `nota_examen`, `nota_proyecto`, `nota_asistencia`), usar getters y setters normales (`@property.setter`) nos obligaría a repetir el mismo bloque `if/raise` una y otra vez.
+* **La Solución:** Un **Descriptor** es una clase que implementa los métodos mágicos `__get__` y `__set__`. Actúa como un "guardián" del atributo a nivel de clase. En nuestro proyecto, `ValidarNota` encapsula la regla de negocio:
+  - Garantiza que la calificación sea de tipo `int` o `float`.
+  - Fuerza que la nota se encuentre strictly entre `0.0` y `10.0`.
+  - Almacena el dato limpiamente dentro del diccionario privado de la instancia (`instance.__dict__`).
+
+
 ### 📄 File: `descriptors.py`
 
 ```python
@@ -49,7 +78,20 @@ class ValidarNota:
         instance.__dict__[self.nombre_atributo] = float(value)
 ```
 
+### 2. Propiedades Administradas de Solo Lectura (`@property`)
+* Usamos el decorador `@property` para exponer el atributo calculable `aprobado`.
+* **Ventaja:** En lugar de guardar una variable `self.aprobado = True` que podría desactualizarse si la nota cambia, `@property` calcula dinámicamente si `nota_examen >= 6.0` en tiempo real sin permitir modificaciones accidentales desde fuera de la clase.
 ---
+
+### 3. Métodos Estáticos de Utilidad (`@staticmethod`)
+* La función `es_nombre_valido(nombre)` está decorada con `@staticmethod`.
+* **Propósito:** Es una utilidad pura que no requiere acceder al estado de ninguna instancia (`self`) ni de la clase (`cls`). Permite validar o limpiar nombres usando expresiones regulares (`re`) antes incluso de intentar instanciar a un estudiante.
+
+### 4. Sobrecarga de Métodos Dunder (`__eq__` y `__lt__`)
+* En lugar de comparar estudiantes con funciones externas, redefinimos los operadores nativos de Python:
+  - **`__eq__` (Igualdad `==`):** Determina que dos estudiantes tienen la misma nota si `e1 == e2`.
+  - **`__lt__` (Menor que `<`):** Permite evaluar `e1 < e2` comparando sus calificaciones.
+  - **Efecto secundario positivo:** Al implementar `__lt__`, Python puede ordenar automáticamente listas de objetos `Estudiante` usando `list.sort()` o `sorted()`.
 
 ### 📄 File: `Estudiante.py`
 
